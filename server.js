@@ -1,4 +1,6 @@
 require("dotenv").config();
+const session = require("express-session");
+const MongoStore = require("connect-mongo").default;
 
 const express = require("express");
 
@@ -7,6 +9,21 @@ const bookRoutes = require("./database/route.js");
 const app = express();
 
 app.use(express.json());
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create({
+            mongoUrl: process.env.MONGO_SESSION_URI,
+            collectionName: "sessions"
+        }),
+        cookie: {
+            maxAge: 1000 * 60 * 60
+        }
+    })
+);
 
 app.use("/books", bookRoutes);
 
