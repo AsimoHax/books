@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
     try {
-        const books = await ReadBook.find();
+        const books = await ReadBook.find().lean();
 
         const mssv = process.env.MSSV;
         const vat = Number(mssv.slice(-1)) + 5;
@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Read error:", error);
         res.status(500).send("Failed to get books");
     }
 });
@@ -41,11 +41,13 @@ router.post("/", async (req, res) => {
             });
         }
 
-        if (typeof price !== "number" || price <= 0) {
-            return res.status(400).json({
-                message: "Price must be a positive number"
-            });
-        }
+        const numericPrice = Number(price);
+
+if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+    return res.status(400).json({
+        message: "Price must be a positive number"
+    });
+}
 
         const priceAfterTax = price * (1 + VAT);
 
