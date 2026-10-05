@@ -15,13 +15,18 @@ router.get("/", async (req, res) => {
     try {
         const books = await ReadBook.find();
 
-        res.json(books);
-    } catch (error) {
-        console.error("Read error:", error);
+        const mssv = process.env.MSSV;
+        const vat = Number(mssv.slice(-1)) + 5;
 
-        res.status(500).json({
-            message: "Failed to get books"
+        res.render("books", {
+            books,
+            mssv,
+            vat
         });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Failed to get books");
     }
 });
 
